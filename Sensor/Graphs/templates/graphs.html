@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sensor Data Graph</title>
+    <!-- Include necessary CSS and JS files for the charting library (e.g., Chart.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Sensor Data Graph</h1>
+    <canvas id="sensorChart"></canvas>
+
+    <script>
+        // Use JavaScript to render the graph on the canvas element
+        // Connect to the Flask-SocketIO server and listen for sensor data
+        var ctx = document.getElementById('sensorChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],  // Array of labels for x-axis
+                datasets: [{
+                    label: 'Temperature (C)',
+                    data: [],  // Array of temperature data
+                    borderColor: 'red',
+                    fill: false
+                }, {
+                    label: 'Humidity (%)',
+                    data: [],  // Array of humidity data
+                    borderColor: 'green',
+                    fill: false
+                }, {
+                    label: 'Pressure (hPa)',
+                    data: [],  // Array of pressure data
+                    borderColor: 'blue',
+                    fill: false
+                }]
+            },
+            options: {
+                // Configure chart options as needed
+            }
+        });
+
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Listen for sensor data from the Flask-SocketIO server
+        socket.on('sensor_data', function(data) {
+            // Update chart data and labels
+            chart.data.labels.push(new Date().toLocaleTimeString());
+            chart.data.datasets[0].data.push(data.temperature);
+            chart.data.datasets[1].data.push(data.humidity);
+            chart.data.datasets[2].data.push(data.pressure);
+            // Update chart
+            chart.update();
+        });
+    </script>
+</body>
+</html>
